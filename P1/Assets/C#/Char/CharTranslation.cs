@@ -7,14 +7,19 @@ public class CharTranslation : MonoBehaviour {
        
 	}
 
-    public void cTranslate (float speed)
-    {
+    public void cTranslate (float speed, Vector3 groundNorm) {
+
 
         float transZ = Input.GetAxis("Vertical") * speed;
         float transX = Input.GetAxis("Horizontal") * speed;
+
         transZ *= Time.deltaTime;
         transX *= Time.deltaTime;
 
-        transform.Translate(transX, 0, transZ);
+        Vector3 translateV = new Vector3(transX, 0,transZ);
+        groundNorm = transform.rotation*groundNorm;
+        translateV = Vector3.ProjectOnPlane(translateV, groundNorm);
+
+        transform.Translate(translateV); 
     }
 }
