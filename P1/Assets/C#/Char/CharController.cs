@@ -3,55 +3,70 @@ using System.Collections;
 
 public class CharController : MonoBehaviour {
 
-    public Jump jump;
     public CharRotation rotation;
     public CharTranslation translation;
 
     GameObject body;
 
     public float rspeed = 2.0f;
-    public float tspeed = 4.0f;
+    public float tspeed = 0.5f;
 
-    bool onGround = false;
+    bool onGround;
+    bool jump = false;
+    bool run = false;
 
-    Vector3 groundNormal;
+    Vector3 groundnormal = new Vector3(0, 1, 0);
+    Vector3 lastposition;
+    Vector3 lasttransform;
 
     void Start (){
+        onGround = false;
         body = this.transform.parent.gameObject;
         Cursor.lockState = CursorLockMode.Locked;
+        lastposition = transform.position;
     }
 	
 	void Update (){
-		SetInputs();
-		SetCursorLock();
+        
+    }
 
-	    if (Cursor.lockState == CursorLockMode.Locked){
-        	CallMethods();
-        }
+    void FixedUpdate()
+    {
+        SetInputs();
+        SetCursorLock();
+        CallMethods();
     }
 
     void CallMethods(){
-	    rotation.cRotate(body, rspeed);
-
-        if (/**onGround ==**/ true){
-        	translation.cTranslate(tspeed, groundNormal);
-        	if (Input.GetKey("space")) {
-            	jump.cJump();
-        	}
-    	}
+	    rotation.cRotate(body, rspeed);    
+    	translation.cTranslate(tspeed, groundnormal, lasttransform, onGround, jump, run);
+    	if (Input.GetKey("space")) {
+            jump = true;
+        } else {
+            jump = false;
+        }
+        if (Input.GetKey("left shift"))
+        {
+            run = true;
+        }
+        else {
+            run = false;
+        }
     }
 
     void SetInputs(){
-    	Vector3 castSource = transform.parent.position;
-    	Vector3 castTarget = transform.parent.position + new Vector3(0, -2, 0);
-    	RaycastHit hit;
+        lasttransform = transform.position - lastposition;
+        lastposition = transform.position;
 
-    	if (Physics.Raycast(castSource, -Vector3.up, out hit, 1.5f)){
-    		onGround = true;
-    		groundNormal = hit.normal;  		
-    	}
-    	else	
-    		onGround = false;
+        RaycastHit hit;
+        Vector3 castsource = transform.parent.position;
+
+        if(Physics.Raycast(castsource, Vector3.down, out hit, 1.5f)) {
+            groundnormal = hit.normal;
+            onGround = true;
+        } else {
+            onGround = false;
+        }
     }
 
     void SetCursorLock(){
